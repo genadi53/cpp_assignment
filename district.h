@@ -15,7 +15,7 @@ struct PartyVotes{
 
 class District {
     public: 
-        // District();
+        District();
         District(string districtName, int totalVoters, int partiesCount);
         District(string* name, int totalVoters, int partiesCount);
         ~District();
@@ -54,6 +54,9 @@ class District {
         void printPartiesNames();
         void setPartiesNames(string names[], int namesLength);
         void writePartiesNames();
+
+        int getArrayOFVoteLength();
+        void setArrayOFVoteLength(int length);
 
     private:
         string districtName;

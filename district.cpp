@@ -1,5 +1,6 @@
 #include "district.h"
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <array>
 
@@ -15,25 +16,37 @@ using namespace std;
 // }
 // map <int, string> * myArray = new map<int, string>[10];
 
+District::District(){
+    cout << "empty" << endl;
+}
+
 District::District(string districtName, int totalVoters, int partiesCount){
+    setName(&districtName);
     setDistrictName(districtName);
     setTotalVoters(totalVoters);
     setPartiesCount(partiesCount);
+    setArrayOFVoteLength(0);
+
 }
 
 District::District(string* name, int totalVoters, int partiesCount){
     setName(name);
+    setDistrictName(*name);
     setTotalVoters(totalVoters);
     setPartiesCount(partiesCount);
+    setArrayOFVoteLength(0);
+        PartyVotes* votesForParties;
+        string* partiesNames;
 }
 
 District::~District(){
         // PartyVotes* votesForParties;
         // string* partiesNames;
-        delete[]votesForParties;
-        delete[]partiesNames;
-        this->votesForParties = NULL;
-        this->partiesNames = NULL;
+      
+            //delete[]votesForParties;
+            this->votesForParties = NULL;
+            //delete[]partiesNames;
+            this->partiesNames = NULL;
 }
 
 string District::getDistrictName(){
@@ -68,6 +81,14 @@ void District::setPartiesCount(int count){
     this->partiesCount = count;
 }
 
+int District::getArrayOFVoteLength(){
+    return votesForPartiesLength;
+}
+
+void District::setArrayOFVoteLength(int length = 0){
+    this->votesForPartiesLength = length;
+}
+
 PartyVotes* District::getVotesForAllParties(){
     return this->votesForParties;
 }
@@ -94,9 +115,8 @@ void District::setVotesForAllParties(PartyVotes votes[], int votesLength){
         }
     }
 
-    cout << "nice" << endl;
     this->votesForParties = new PartyVotes[votesLength];
-    this->votesForPartiesLength = votesLength;
+    setArrayOFVoteLength(votesLength);
 
     for(int i = 0; i < votesLength; i++){
         this->votesForParties[i] = votes[i];
@@ -181,9 +201,80 @@ void District::writePartiesNames(){
     this->printPartiesNames();
 }
 
-void saveDistrictsToFile(District districts[]){
+void saveDistrictsToFile(District districts[], int count){
+    ofstream file;
+    file.open("data.txt", ios::out);
+ // string districtName;
+        // string* name;
+        // int totalVoters; 
+        // int partiesCount;
+        // PartyVotes* votesForParties;
+        // int votesForPartiesLength;
+        // string* partiesNames;
+    if(file.is_open()){
+        for(int i = 0; i < count; i++){
+            // file.write((char*)&districts, sizeof(districts));
+            file << districts[i].getDistrictName() << "\n";
+            file << districts[i].getTotalVoters() << "\n";
+            file << districts[i].getPartiesCount() << "\n";
+            
+            string* partiesNames = districts[i].getPartiesNames();
+            for(int j = 0; j < districts[i].getPartiesCount(); j++){
+               
+               if(j == districts[i].getPartiesCount()-1){
+                   file << partiesNames[j] << "\n";
+               }
+               else file << partiesNames[j] << ", "; 
+            }
+
+            file << districts[i].getArrayOFVoteLength() << "\n";
+            
+            PartyVotes* votesArray = districts[i].getVotesForAllParties();
+            for(int k; k < districts[i].getArrayOFVoteLength(); k++){
+                file << votesArray[k].partyName << " - " << votesArray[k].votes << endl; 
+            }
+        }
+    }
+
+  
+ 
+       
+
+    // ifstream file_obj;
+
+    // file_obj.open("data.txt", ios::in);
+    // District d1;
+    // file_obj.read((char*)&d1, sizeof(d1));
+    // cout << "Data" << endl;
+    // cout << d1.getTotalVoters() << endl;
 
 }
+
+
+void readDistrictsFromFile(){
+    ofstream file;
+    file.open("data.txt", ios::out);
+
+    // file.write((char*)&districts, sizeof(districts));
+ 
+        // string districtName;
+        // string* name;
+        // int totalVoters; 
+        // int partiesCount;
+        // PartyVotes* votesForParties;
+        // int votesForPartiesLength;
+        // string* partiesNames;
+
+    // ifstream file_obj;
+
+    // file_obj.open("data.txt", ios::in);
+    // District d1;
+    // file_obj.read((char*)&d1, sizeof(d1));
+    // cout << "Data" << endl;
+    // cout << d1.getTotalVoters() << endl;
+
+}
+
 
 int main(){
  
@@ -193,12 +284,14 @@ int main(){
     *mypointer = "d123";
 
     District *d2;
-    d2 = new District(name, 100, 5);
+    d2 = new District("name", 100, 5);
     string names[] = {"qwertyui", "p1", "pqww", "qwertr", "new"};
     District d1(mypointer, 100, sizeof(names)/sizeof(names[0]));
 
     // cout << "d1: "<< *d1.getName() << endl;
     // cout << "d2: "<< d2->getDistrictName() << endl;
+    // cout << "d1: "<< d1.getDistrictName() << endl;
+    // cout << "d2: "<< *d2->getName() << endl;
 
     // cout << "d1: "<< d1.getTotalVoters() << endl;
     // cout << "d2: "<< d2->getTotalVoters() << endl;
@@ -209,28 +302,32 @@ int main(){
     // cout << "* " << sizeof(names)/sizeof(names[0]) << endl;
 
     d1.setPartiesNames(names, sizeof(names)/sizeof(names[0]));
-    // d2->writePartiesNames();
+    // // d2->writePartiesNames();
     d1.printPartiesNames();
 
     PartyVotes* arr = new PartyVotes[2];
     arr[0] = {"p1", 2};
     arr[1] = {"qwertyui", 3};
-    cout << arr[0].votes << endl;
+    // cout << arr[0].votes << endl;
     d1.setVotesForAllParties(arr, 2);
 
-    PartyVotes* votes = d1.getVotesForAllParties();
-    for(int i=0; i < 2; i++){
-        cout << votes[i].partyName << " " << votes[i].votes << endl;
-    }
-
-    d1.setVotesForForParty("qwertyui", 5);
-    cout << d1.getVotesForParty("qwertyui") << endl;
-
-    // string* getnames = d1.getPartiesNames();
-    //     // *(getnames+i) << endl;
-    // for(int i = 0; i < d1.getPartiesCount(); i++){
-    //     cout << "p[" << i << "]: " << getnames[i]  <<endl;
+    // PartyVotes* votes = d1.getVotesForAllParties();
+    // for(int i=0; i < 2; i++){
+    //     cout << votes[i].partyName << " " << votes[i].votes << endl;
     // }
+
+    // d1.setVotesForForParty("qwertyui", 5);
+    // cout << d1.getVotesForParty("qwertyui") << endl;
+
+    // // string* getnames = d1.getPartiesNames();
+    // //     // *(getnames+i) << endl;
+    // // for(int i = 0; i < d1.getPartiesCount(); i++){
+    // //     cout << "p[" << i << "]: " << getnames[i]  <<endl;
+    // // }
+    District districts[1];
+    districts[0] = d1;
+    saveDistrictsToFile(districts, 1);
+
 
     return 0;
 }
