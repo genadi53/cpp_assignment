@@ -1,6 +1,5 @@
 #ifndef District_H
 #define District_H
-#pragma once
 
 #include <iostream>
 #include <string>
@@ -19,19 +18,6 @@ class District {
         District(string districtName, int totalVoters, int partiesCount);
         District(string* name, int totalVoters, int partiesCount);
         ~District();
-        // {
-        //         cout << "districtName" << endl;
-        //         cout << districtName << endl;
-        //         this->districtName = districtName;
-        // }
-
-        // string* getDistrictName(){
-        //     return *districtName;
-        // }
-
-        // void setDistrictName(string* name){
-        //     districtName = &name;
-        // }
 
         string getDistrictName();
         void setDistrictName(string districtName);
@@ -58,6 +44,9 @@ class District {
         int getArrayOFVoteLength();
         void setArrayOFVoteLength(int length);
 
+        void printPercentages();
+        void printWinner();  
+
     private:
         string districtName;
         string* name;
@@ -66,6 +55,7 @@ class District {
         PartyVotes* votesForParties;
         int votesForPartiesLength;
         string* partiesNames;
+        bool haveWinner;
     
 };
 
