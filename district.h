@@ -67,18 +67,6 @@ class District {
         string winnerName;
 };
 
-int getValidNumber(){
-    int n;
-    cin >> n;
-    while ((cin.fail() || n <=0)){
-        cin.clear();
-        cin.ignore();
-        cout << "Not a valid number. Please reenter: ";
-        cin >> n;
-    }
-    return n;
-}
-
 void saveDistrictsToFile(vector<District>*  districts);
 void readDistrictsFromFile();
 void printPercentagesInAllDistricts(vector<District>* districts);
@@ -86,5 +74,6 @@ void printWinnersInAllDistricts(vector<District>* districts);
 void saveDistrictsWithNoWinnersToFile(vector<District>* districts);
 bool nameCompare(string a, string b);
 void printMenuOptions();
+int getValidNumber();
 
 #endif
