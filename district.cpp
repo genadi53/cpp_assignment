@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 #include <cstdio>
+// #include <conio>
+
 
 using namespace std;
 
@@ -82,6 +84,22 @@ int District::getPartiesCount(){
 
 void District::setPartiesCount(int count){
     this->partiesCount = count;
+}
+
+string District::getWinnerName(){
+    return this->winnerName;
+}
+
+void District::setWinnerName(string name){
+    this->winnerName = name;
+}
+
+bool District::getHaveWinner(){
+    return this->haveWinner;
+}
+
+void District::setHaveWinner(bool haveWinner){
+    this->haveWinner = haveWinner;
 }
 
 int District::getArrayOFVoteLength(){
@@ -186,7 +204,7 @@ void District::setPartiesNames(string names[], int namesLength){
 void District::printPartiesNames(){
     
     for(int i = 0; i < this->partiesCount; i++){
-        cout << "Party name[" << i << "]: " << this->partiesNames[i] << endl;
+        cout << "Party " << i+1 << ": " << this->partiesNames[i] << endl;
   
     }
 }
@@ -197,46 +215,44 @@ void District::writePartiesNames(){
     string name;
 
     for(int i = 0; i < this->partiesCount; i++){
-        cout << "Enter party name: " << endl;
+        cout << "Enter party "<< i+1 <<" name: " << endl;
         cin >> name;
         this->partiesNames[i] = name;
     }
     this->printPartiesNames();
 }
 
-void saveDistrictsToFile(District districts[], int count){
+void saveDistrictsToFile(vector<District>* districts){
     ofstream file;
     file.open("data.txt", ios::out);
     if(file.is_open()){
-        for(int i = 0; i < count; i++){
+        for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
             // file.write((char*)&districts, sizeof(districts));
-            file << "District: " << districts[i].getDistrictName() << "\n";
-            file << "Total voters: " << districts[i].getTotalVoters() << "\n";
-            file << "Number of parties: " << districts[i].getPartiesCount() << "\n";
+            file << "District: " << district->getDistrictName() << "\n";
+            file << "Total voters: " << district->getTotalVoters() << "\n";
+            file << "Number of parties: " << district->getPartiesCount() << "\n";
             
-            string* partiesNames = districts[i].getPartiesNames();
-            for(int j = 0; j < districts[i].getPartiesCount(); j++){
+            string* partiesNames = district->getPartiesNames();
+            for(int j = 0; j < district->getPartiesCount(); j++){
                
-               if(j == districts[i].getPartiesCount()-1){
+               if(j == district->getPartiesCount()-1){
                    file << partiesNames[j] << "\n";
                }
                else file << partiesNames[j] << ", "; 
             }
 
-            file << districts[i].getArrayOFVoteLength() << "\n";
+            file << district->getArrayOFVoteLength() << "\n";
             
-            PartyVotes* votesArray = districts[i].getVotesForAllParties();
-            for(int k = 0; k < districts[i].getArrayOFVoteLength(); k++){
+            PartyVotes* votesArray = district->getVotesForAllParties();
+            for(int k = 0; k < district->getArrayOFVoteLength(); k++){
                 file << votesArray[k].partyName << " - " << votesArray[k].votes << endl; 
             }
             file << "\n";
         }
     }
-
-  
- 
-       
-
+    
+    file.close();
+    cout << "Data saved to file." << endl;
     // ifstream file_obj;
 
     // file_obj.open("data.txt", ios::in);
@@ -295,16 +311,68 @@ void District::printPercentages(){
     }
 }
 
+void District::calculateWinner(){
+    int totalVoters = this->getTotalVoters();
+    string* partiesNames = this->getPartiesNames(); 
+    PartyVotes* votesArray = this->getVotesForAllParties();
+
+    bool haveWinner = false; string winnerName;
+    int highestVoteCount = -1;
+    
+    for(int i = 0; i < this->getPartiesCount(); i++){
+        for(int j = 0; j < this->getArrayOFVoteLength(); j++){
+            if(partiesNames[i] == votesArray[j].partyName){
+
+                if(highestVoteCount <  votesArray[j].votes){
+                    highestVoteCount = votesArray[j].votes;
+                    winnerName = votesArray[j].partyName;
+                    haveWinner = true;
+                } else if(highestVoteCount == votesArray[j].votes) {
+                    winnerName = winnerName + " tied " + votesArray[j].partyName;
+                    haveWinner = false;
+                }
+            }
+        }
+    }
+
+    setHaveWinner(haveWinner);
+    setWinnerName(winnerName);
+}
+
+void District::writeVotesForAllParties(){
+    int totalVoters = this->getTotalVoters();
+    string* partiesNames = this->getPartiesNames();
+    int numberOfParties = this->getPartiesCount();
+    PartyVotes* votesArray = new PartyVotes[numberOfParties];;
+    int votes, sum = 0;
+
+    for(int i = 0; i < numberOfParties; i++){
+        cout << "Enter votes for party " << partiesNames[i] << ": " << endl;
+        cin >> votes;
+
+        sum += votes;
+        if(sum > totalVoters || sum < 0 || votes < 0) {
+            cout << "invalid number of votes" << endl;
+            sum -= votes;
+            i--;
+        } else {
+            votesArray[i] = { partiesNames[i], votes };
+        }
+
+    }
+    this->setVotesForAllParties(votesArray, numberOfParties);
+
+}
+
 bool nameCompare(string a, string b){
 	//returns 1 if string a is alphabetically less than string b
 	return a<b;
 }
 
-void printPercentagesInAllDistricts(District districts[], int length){
+void printPercentagesInAllDistricts(vector<District>* districts){
     vector<string> districtNames;
-    cout << "*********************" << endl;
-    for(int i = 0; i < length; i++){
-        districtNames.push_back(districts[i].getDistrictName()); 
+     for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
+        districtNames.push_back(district->getDistrictName()); 
     }
 
 	//mycomp function is the defined function which 
@@ -313,112 +381,134 @@ void printPercentagesInAllDistricts(District districts[], int length){
 
     
     for(int i = 0; i < districtNames.size(); i++){
-		cout<<districtNames[i]<<endl;
-        for(int j = 0; j < length; j++){
-            if(districtNames[i] == districts[j].getDistrictName()){
-                districts[j].printPercentages();
+        for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
+            if(districtNames[i] ==  district->getDistrictName()){
+                cout << "District: " << districtNames[i] << endl;
+                district->printPercentages();
             }
         }
     }
 }
 
+void printWinnersInAllDistricts(vector<District>* districts){
+    vector<string> districtNames;
+     for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
+        districtNames.push_back(district->getDistrictName()); 
+    }
+	sort(districtNames.begin(), districtNames.end(), nameCompare);
+
+    for(int i = 0; i < districtNames.size(); i++){
+        for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
+            if(districtNames[i] ==  district->getDistrictName()){
+                cout << "In district: " << districtNames[i] << " ";
+                if(district->getHaveWinner()){
+                    cout << "the winner is: " << district->getWinnerName() << endl;
+                } else {
+                    cout << "there is no winner ( " << district->getWinnerName() <<" )." << endl;
+                }
+            }
+        }
+    }
+}
+
+void saveDistrictsWithNoWinnersToFile(vector<District>* districts){
+
+    ofstream file;
+    file.open("withoutWinners.txt", ios::out);
+    if(file.is_open()){
+        for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
+            if(!district->getHaveWinner()){
+                file << "District: " << district->getDistrictName() << "\n";
+                file << "Total voters: " << district->getTotalVoters() << "\n";
+                
+                PartyVotes* votesArray = district->getVotesForAllParties();
+                int sumVotes = 0;
+
+                for(int k = 0; k < district->getArrayOFVoteLength(); k++){
+                    sumVotes += votesArray[k].votes; 
+                }
+                
+                double percent = ((double)sumVotes/district->getTotalVoters())*100;
+                file << "Persentage of people, who didn't vote: " << percent << endl;
+                file << "\n";
+            }
+        }
+    }
+    
+    file.close();
+    cout << "Data saved to file." << endl;
+}
+
 void printMenuOptions(){
     cout << "1. Add new District." << endl;     
-    cout << "2. Remove District." << endl;                                   
-    cout << "3. Print parties' percentages." << endl;
-    cout << "4. Print district winners." << endl;         
-    cout << "5. Save districts to file." << endl;
-    cout << "6. Save winners to file." << endl;
-    cout << "&. Print options." << endl;
+    cout << "2. Print parties' percentages." << endl;
+    cout << "3. Print district winners." << endl;         
+    cout << "4. Print districts with no winners." << endl;
+    cout << "5. Save all districts to file." << endl;
+    cout << "6. Save districts with no winners to file." << endl;
+    cout << "7. Print options." << endl;
     cout << "0. Exit." << endl;            
 }
 
-void menu(){
-    int c;
-    do{
-        printMenuOptions();
-        c = getchar();
-        switch(int(c)){
-            case 49: {
-
-            };
-            case 50: {
-
-            };
-            case 51: {
-                
-            };
-            case 52: {
-                
-            };
-            case 53: {
-                
-            };
-            case 54: {
-                
-            };
-            case 55: {
-                
-            };
-            case 48: break;
-        }
-    }while(c!=0);
-};
 
 int main(){
- 
+    
+    vector<District> districts;
+    int choice;
     string name;
-    string * mypointer;
-    mypointer = &name;
-    *mypointer = "d123";
+    int totalVoters; 
+    int partiesCount; 
+    bool exit = false;
 
-    District *d2;
-    d2 = new District("name", 100, 5);
-    string names[] = {"qwertyui", "p1", "pqww", "qwertr", "new"};
-    District d1(mypointer, 100, sizeof(names)/sizeof(names[0]));
-    District d3("mypointer", 10, sizeof(names)/sizeof(names[0]));
-    // cout << "d1: "<< *d1.getName() << endl;
-    // cout << "d2: "<< d2->getDistrictName() << endl;
-    // cout << "d1: "<< d1.getDistrictName() << endl;
-    // cout << "d2: "<< *d2->getName() << endl;
-
-    // cout << "d1: "<< d1.getTotalVoters() << endl;
-    // cout << "d2: "<< d2->getTotalVoters() << endl;
-
-    // cout << "d1: "<< d1.getPartiesCount() << endl;
-    // cout << "d2: "<< d2->getPartiesCount() << endl;
-
-    // cout << "* " << sizeof(names)/sizeof(names[0]) << endl;
-
-    d1.setPartiesNames(names, sizeof(names)/sizeof(names[0]));
-    d3.setPartiesNames(names, sizeof(names)/sizeof(names[0]));
-    d2->writePartiesNames();
-    d1.printPartiesNames();
-
-    PartyVotes* arr = new PartyVotes[2];
-    arr[0] = {"p1", 2};
-    arr[1] = {"qwertyui", 3};
-    // cout << arr[0].votes << endl;
-    d1.setVotesForAllParties(arr, 2);
-    d3.setVotesForAllParties(arr, 2);
-    // PartyVotes* votes = d1.getVotesForAllParties();
-    // for(int i=0; i < 2; i++){
-    //     cout << votes[i].partyName << " " << votes[i].votes << endl;
-    // }
-
-    // d1.setVotesForForParty("qwertyui", 5);
-    // cout << d1.getVotesForParty("qwertyui") << endl;
-
-    // // string* getnames = d1.getPartiesNames();
-    // //     // *(getnames+i) << endl;
-    // // for(int i = 0; i < d1.getPartiesCount(); i++){
-    // //     cout << "p[" << i << "]: " << getnames[i]  <<endl;
-    // // }
-    District districts[1];
-    districts[0] = d1;
-    districts[1] = d3;
-    saveDistrictsToFile(districts, 2);
-    d1.printPercentages();
-    printPercentagesInAllDistricts(districts, 2);
+    do{
+        printMenuOptions();
+        cin >> choice;
+        switch(choice){
+            case 1: {
+                cout << "Enter district Name: " <<endl;
+                cin >> name;
+                cout << "Enter the number of voters in the district: " <<endl;
+                totalVoters = getValidNumber();
+                cout << "Enter the number of parties in the district: " <<endl;
+                partiesCount = getValidNumber();
+                District d1(name, totalVoters, partiesCount);
+                d1.writePartiesNames();
+                d1.writeVotesForAllParties();
+                d1.calculateWinner();
+                districts.push_back(d1);
+                // vector.erase( vector.begin() + 3 );
+                break;
+            };
+            case 2: {
+                printPercentagesInAllDistricts(&districts);
+                break;
+            };
+            case 3: {
+                printWinnersInAllDistricts(&districts);
+                break;
+            };
+            case 4: {
+                // printPercentagesInAllDistricts(&districts);
+                break;
+            };
+            case 5: {
+                saveDistrictsToFile(&districts);
+                break;
+            };
+            case 6: {
+                saveDistrictsWithNoWinnersToFile(&districts);
+                break;
+            };
+            case 7: {
+                printMenuOptions();
+                break;
+            };
+            case 0: {
+                exit = true;
+                break;  
+            }
+            default: break;
+        }
+    }while(!exit);   
     return 0;
 }

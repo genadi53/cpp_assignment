@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <array>
+#include <vector>
 using namespace std;
 
 
@@ -33,6 +34,7 @@ class District {
         
         PartyVotes* getVotesForAllParties();
         void setVotesForAllParties(PartyVotes votes[], int votesLength);
+        void writeVotesForAllParties();
         int getVotesForParty(string name);
         void setVotesForForParty(string name, int votes);
 
@@ -45,7 +47,13 @@ class District {
         void setArrayOFVoteLength(int length);
 
         void printPercentages();
-        void printWinner();  
+        void calculateWinner();
+
+        string getWinnerName();
+        void setWinnerName(string name);  
+
+        bool getHaveWinner();
+        void setHaveWinner(bool haveWinner);
 
     private:
         string districtName;
@@ -56,8 +64,27 @@ class District {
         int votesForPartiesLength;
         string* partiesNames;
         bool haveWinner;
-    
+        string winnerName;
 };
 
+int getValidNumber(){
+    int n;
+    cin >> n;
+    while ((cin.fail() || n <=0)){
+        cin.clear();
+        cin.ignore();
+        cout << "Not a valid number. Please reenter: ";
+        cin >> n;
+    }
+    return n;
+}
+
+void saveDistrictsToFile(vector<District>*  districts);
+void readDistrictsFromFile();
+void printPercentagesInAllDistricts(vector<District>* districts);
+void printWinnersInAllDistricts(vector<District>* districts);
+void saveDistrictsWithNoWinnersToFile(vector<District>* districts);
+bool nameCompare(string a, string b);
+void printMenuOptions();
 
 #endif
