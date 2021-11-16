@@ -7,7 +7,8 @@
 #include <vector>
 using namespace std;
 
-
+// helper struct used for maping name of the party with 
+// votes for it
 struct PartyVotes{
     string partyName;
     int votes;
@@ -72,6 +73,7 @@ void readDistrictsFromFile();
 void printPercentagesInAllDistricts(vector<District>* districts);
 void printWinnersInAllDistricts(vector<District>* districts);
 void saveDistrictsWithNoWinnersToFile(vector<District>* districts);
+void readDistrictsFromFile();
 bool nameCompare(string a, string b);
 void printMenuOptions();
 int getValidNumber();

@@ -59,6 +59,10 @@ int main(){
                 break;
             };
             case 7: {
+                readDistrictsFromFile();
+                break;
+            };
+            case 8: {
                 printMenuOptions();
                 break;
             };
@@ -73,7 +77,8 @@ int main(){
 }
 
 // Constructors and destructor
-// 
+// difference between the 2 constructocs is how the name value is passed
+// (by value or by reference)
 District::District(){}
 
 District::District(string districtName, int totalVoters, int partiesCount){
@@ -105,7 +110,7 @@ District::~District(){
 }
 
 // Getters and setters for name of the district
-// 
+// again for how name is passed(by value or by reference)  
 string District::getDistrictName(){
     return this->districtName;
 }
@@ -311,6 +316,13 @@ void District::writePartiesNames(){
 
 // function to save to file multiple District objects
 void saveDistrictsToFile(vector<District>* districts){
+    
+    // Check it there are any districts
+    if(districts.size() == 0) {
+        cout << "Please enter districts first" << endl;
+        return 0;
+    }
+    
     ofstream file;
     file.open("data.txt", ios::out);
 
@@ -339,10 +351,28 @@ void saveDistrictsToFile(vector<District>* districts){
             }
             file << "\n";
         }
-    }
+    } else cout << "Unable to open file" << endl;
     
     file.close();
     cout << "Data saved to file." << endl;
+}
+
+// function to print saved districts from file
+void readDistrictsFromFile(){
+
+	ifstream file;
+	file.open("data.txt", ios::in);
+
+    string line;
+
+    //check if file opened, then print the objects from the file
+    if(file.is_open()){
+        while(getline(file, line)){
+            cout << line << endl;
+        }
+    } else cout << "Unable to open file" << endl;
+    
+    file.close();
 }
 
 // prints the persentage of vote for each party in one district
@@ -443,6 +473,12 @@ bool nameCompare(string a, string b){
 // in multiple Districts
 void printPercentagesInAllDistricts(vector<District>* districts){
 	
+    // Check it there are any districts
+    if(districts.size() == 0) {
+        cout << "Please enter districts first" << endl;
+        return 0;
+    }
+
     //used for sorting the names in alphabatical order
     vector<string> districtNames;
      for(vector<District>::iterator district = districts->begin(); district != districts->end(); ++district){
@@ -464,6 +500,12 @@ void printPercentagesInAllDistricts(vector<District>* districts){
 
 // function that prints the winning party in multiple Districts
 void printWinnersInAllDistricts(vector<District>* districts){
+
+    // Check it there are any districts
+    if(districts.size() == 0) {
+        cout << "Please enter districts first" << endl;
+        return 0;
+    }
 
     //used for sorting the names in alphabatical order
     vector<string> districtNames;
@@ -491,6 +533,12 @@ void printWinnersInAllDistricts(vector<District>* districts){
 // function to save to file multiple District objects
 // that didn't have winning party
 void saveDistrictsWithNoWinnersToFile(vector<District>* districts){
+
+    // Check it there are any districts
+    if(districts.size() == 0) {
+        cout << "Please enter districts first" << endl;
+        return 0;
+    }
 
     ofstream file;
     file.open("withoutWinners.txt", ios::out);
@@ -522,13 +570,15 @@ void saveDistrictsWithNoWinnersToFile(vector<District>* districts){
 
 // prints the menu options for the loop in main function
 void printMenuOptions(){
+    cout << "***** Menu Options *****" << endl;
     cout << "1. Add new District." << endl;     
     cout << "2. Print parties' percentages." << endl;
     cout << "3. Print district winners." << endl;         
     cout << "4. Print districts with no winners." << endl;
     cout << "5. Save all districts to file." << endl;
     cout << "6. Save districts with no winners to file." << endl;
-    cout << "7. Print options." << endl;
+    cout << "7. Print districts from file." << endl;
+    cout << "8. Print options." << endl;
     cout << "0. Exit." << endl;            
 }
 
